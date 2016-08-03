@@ -44,7 +44,7 @@ type ErrorResponse struct {
 // @Title Get user list of a group.
 // @Resource users
 // @Description Get users related to a specific group.
-// @Param  group_id  path  int  true  "Test token."
+// @Param  group_id  path  int  true  "Id of a specific group."
 // @Success  200  {object}  UsersResponse  "EmptyResponse JSON"
 // @Failure  400  {object}  ErrorResponse  "ErrorResponse JSON"
 // @Produce json
