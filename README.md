@@ -10,10 +10,10 @@ Based on [yvasiyarov/swagger](https://github.com/yvasiyarov/swagger) repository.
 Comments in main.go
 ```go
 // @Version 1.0.0
-// @Title Minapp
+// @Title Backend API
 // @Description API usually works as expected. But sometimes its not true.
 // @BasePath /
-// @Schemes http, https
+// @Schemes http,https
 // @ContactName Abcd
 // @ContactEmail abce@email.com
 // @ContactURL http://someurl.oxox
