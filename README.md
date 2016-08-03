@@ -45,7 +45,7 @@ type ErrorResponse struct {
 // @Resource users
 // @Description Get users related to a specific group.
 // @Param  group_id  path  int  true  "Id of a specific group."
-// @Success  200  {object}  UsersResponse  "EmptyResponse JSON"
+// @Success  200  {object}  UsersResponse  "UsersResponse JSON"
 // @Failure  400  {object}  ErrorResponse  "ErrorResponse JSON"
 // @Produce json
 // @Router /api/group/{group_id}/users [get]
