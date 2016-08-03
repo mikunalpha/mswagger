@@ -23,26 +23,33 @@ Comments in main.go
 ```
 Comments for API handleFunc
 ```go
-type EmptyResponse struct {}
+type User struct {
+  Id   uint64 `json:"id"`
+  Name string `json:"name"`
+}
+
+type UsersResponse struct {
+  Data []Users `json:"users"`
+}
 
 type Error struct {
-	Code string `json:"code"`
-	Msg  string `json:"msg"`
+  Code string `json:"code"`
+  Msg  string `json:"msg"`
 }
 
 type ErrorResponse struct {
-	Error Error `json:"error"`
+  ErrorInfo Error `json:"error"`
 }
 
 // @Title Get user list of a group.
 // @Resource users
 // @Description Get users related to a specific group.
 // @Param  group_id  path  int  true  "Test token."
-// @Success  200  {object}  EmptyResponse  "EmptyResponse JSON"
+// @Success  200  {object}  UsersResponse  "EmptyResponse JSON"
 // @Failure  400  {object}  ErrorResponse  "ErrorResponse JSON"
 // @Produce json
-// @Router /api/group/{group_id} [get]
-func GetUsers() {
+// @Router /api/group/{group_id}/users [get]
+func GetGroupUsers() {
   // ...
 }
 ```
