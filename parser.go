@@ -618,7 +618,14 @@ func (operation *OperationObject) ParseParamComment(commentLine string) error {
 			swaggerParameter.Type = basicTypesSwaggerTypes[typeName]
 			swaggerParameter.Format = basicTypesSwaggerFormats[typeName]
 		} else {
-			swaggerParameter.Type = typeName
+			if _, ok := operation.parser.Swagger.Definitions[typeName]; ok {
+				// swaggerParameter.Ref = "#/definitions/" + typeName
+				swaggerParameter.Schema = &SchemaObject{
+					Ref: "#/definitions/" + typeName,
+				}
+			} else {
+				swaggerParameter.Type = typeName
+			}
 		}
 		requiredText := strings.ToLower(matches[4])
 		swaggerParameter.Required = (requiredText == "true" || requiredText == "required")

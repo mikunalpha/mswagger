@@ -1,7 +1,7 @@
 # mswagger
 Based on [yvasiyarov/swagger](https://github.com/yvasiyarov/swagger) repository.
- 
-## About 
+
+## About
 1. Support to parse vendor folder.
 2. Generate swagger 2.0 json file.
 3. Fix mappings of some field type with swagger-ui.
@@ -42,7 +42,7 @@ type ErrorResponse struct {
 }
 
 // @Title Get user list of a group.
-// @Resource users
+// @Resource users "Normal user of this system"
 // @Description Get users related to a specific group.
 // @Param  group_id  path  int  true  "Id of a specific group."
 // @Success  200  {object}  UsersResponse  "UsersResponse JSON"
@@ -50,6 +50,18 @@ type ErrorResponse struct {
 // @Produce json
 // @Router /api/group/{group_id}/users [get]
 func GetGroupUsers() {
+  // ...
+}
+
+// @Title Get user list of a group.
+// @Resource users
+// @Description Create a new user.
+// @Param  user  body User  true  "Info of a user."
+// @Success  200  {object}  User  "UsersResponse JSON"
+// @Failure  400  {object}  ErrorResponse  "ErrorResponse JSON"
+// @Produce json
+// @Router /api/user [post]
+func PostUser() {
   // ...
 }
 ```

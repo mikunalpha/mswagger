@@ -66,7 +66,7 @@ type ParameterObject struct {
 	In               string        `json:"in"`
 	Description      string        `json:"description,omitempty"`
 	Required         bool          `json:"required,omitempty"`
-	Schema           interface{}   `json:"schema,omitempty"`
+	Schema           *SchemaObject `json:"schema,omitempty"`
 	Type             string        `json:"type,omitempty"`
 	Format           string        `json:"format,omitempty"`
 	AllowEmptyValue  bool          `json:"allowEmptyValue,omitempty"`
