@@ -1,10 +1,10 @@
 # mswagger
 Based on [yvasiyarov/swagger](https://github.com/yvasiyarov/swagger) repository.
 
-## About
-1. Support to parse vendor folder.
-2. Generate swagger 2.0 json file.
-3. Fix mappings of some field type with swagger-ui.
+## Todo
+1. ~~Support to parse vendor folder.~~
+2. ~~Generate swagger 2.0 json file.~~
+3. ~~Fix mappings of some field type with swagger-ui.~~
 
 ## Usage
 Comments in main.go
