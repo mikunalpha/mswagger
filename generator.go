@@ -49,10 +49,10 @@ func InitParser(controllerClass, ignore string) *Parser {
 }
 
 type Params struct {
-	ApiPackage, MainApiFile, OutputFormat, OutputSpec, ControllerClass, Ignore string
+	ApiPackage, MainApiFile, OutputFormat, OutputPath, ControllerClass, Ignore string
 }
 
-func Run(folderPath string) error {
+func Run(params Params) error {
 	gopath := os.Getenv("GOPATH")
 	if gopath == "" {
 		return errors.New("$GOPATH environment variable is empty.")
@@ -66,17 +66,33 @@ func Run(folderPath string) error {
 	}
 	apiPackage := dirname[len(gopath)+5:]
 
-	params := Params{
+	defaultParams := Params{
 		ApiPackage:      apiPackage,
 		MainApiFile:     apiPackage + "/main.go",
-		OutputFormat:    "swagger",    // Current only swagger
-		OutputSpec:      "swagger-ui", // folder path
+		OutputFormat:    "swagger",             // Current only swagger
+		OutputPath:      "swagger-ui/index.js", // folder path
 		ControllerClass: "",
 		Ignore:          "swagger",
 	}
 
-	if folderPath != "" {
-		params.OutputSpec = folderPath
+	if params.ApiPackage == "" {
+		params.ApiPackage = defaultParams.ApiPackage
+	}
+	if params.MainApiFile == "" {
+		params.MainApiFile = defaultParams.MainApiFile
+	}
+	// if params.OutputFormat == "" {
+	// 	params.OutputFormat = defaultParams.OutputFormat
+	// }
+	params.OutputFormat = defaultParams.OutputFormat
+	if params.OutputPath == "" {
+		params.OutputPath = defaultParams.OutputPath
+	}
+	if params.ControllerClass == "" {
+		params.ControllerClass = defaultParams.ControllerClass
+	}
+	if params.Ignore == "" {
+		params.Ignore = defaultParams.Ignore
 	}
 
 	parser := InitParser(params.ControllerClass, params.Ignore)
@@ -107,13 +123,13 @@ func Run(folderPath string) error {
 	// output, err := json.MarshalIndent(parser.Swagger, "", "  ")
 	// fmt.Println(string(output))
 
-	err = generateSwaggerUiFiles(parser, params.OutputSpec)
+	err = generateSwaggerUiFiles(parser, params.OutputPath)
 
 	return err
 }
 
-func generateSwaggerUiFiles(parser *Parser, outputSpec string) error {
-	fd, err := os.Create(path.Join(outputSpec, "index.json"))
+func generateSwaggerUiFiles(parser *Parser, OutputPath string) error {
+	fd, err := os.Create(OutputPath)
 	if err != nil {
 		return fmt.Errorf("Can not create the master index.json file: %v\n", err)
 	}

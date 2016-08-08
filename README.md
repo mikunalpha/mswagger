@@ -56,8 +56,8 @@ func GetGroupUsers() {
 // @Title Get user list of a group.
 // @Resource users
 // @Description Create a new user.
-// @Param  user  body User  true  "Info of a user."
-// @Success  200  {object}  User  "UsersResponse JSON"
+// @Param  user  body  User  true  "Info of a user."
+// @Success  200  {object}  User           "UsersResponse JSON"
 // @Failure  400  {object}  ErrorResponse  "ErrorResponse JSON"
 // @Produce json
 // @Router /api/user [post]
@@ -70,8 +70,11 @@ Code in main.go
 import "github.com/mikunalpha/mswagger"
 
 // ...
-  folderPath := "./" // Default is "swagger-ui"
-  if err := mswagger.Run(path); err != nil {
+  params := mswagger.Params{
+    OutputPath: "./swagger.js",
+  }
+
+  if err := mswagger.Run(params); err != nil {
     fmt.Println(err)
   }
 // ...
