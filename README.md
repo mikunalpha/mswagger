@@ -71,7 +71,7 @@ import "github.com/mikunalpha/mswagger"
 
 // ...
   params := mswagger.Params{
-    OutputPath: "./swagger.js",
+    OutputPath: "./swagger.json",
   }
 
   if err := mswagger.Run(params); err != nil {
