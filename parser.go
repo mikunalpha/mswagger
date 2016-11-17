@@ -256,6 +256,10 @@ func (parser *Parser) CheckRealPackagePath(packagePath string) string {
 			if _, err := os.Stat(evalutedPath); err == nil {
 				pkgRealpath = evalutedPath
 			}
+		} else if evalutedPath, err := filepath.EvalSymlinks(filepath.Join(goroot, "src/vendor", packagePath)); err == nil {
+			if _, err := os.Stat(evalutedPath); err == nil {
+				pkgRealpath = evalutedPath
+			}
 		}
 
 		// next, check GOROOT (/src/pkg) (for golang < v1.4)
@@ -722,6 +726,7 @@ var basicTypesSwaggerTypes = map[string]string{
 	"float32": "number",
 	"float64": "number",
 	"string":  "string",
+	"file":    "formData",
 }
 
 var basicTypesSwaggerFormats = map[string]string{
