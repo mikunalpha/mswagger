@@ -886,7 +886,9 @@ func (m *Model) ParseModel(modelName string, currentPackage string, knownModelNa
 			if IsBasicType(typeName) {
 				if IsBasicTypeSwaggerType(typeName) {
 					property.Format = basicTypesSwaggerFormats[typeName]
-					property.Type = basicTypesSwaggerTypes[typeName]
+					if property.Type != "array" {
+						property.Type = basicTypesSwaggerTypes[typeName]
+					}
 				}
 				continue
 			}
