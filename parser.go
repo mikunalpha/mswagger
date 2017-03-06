@@ -866,7 +866,8 @@ func (m *Model) ParseModel(modelName string, currentPackage string, knownModelNa
 
 	var innerModelList []*Model
 	if astTypeDef, ok := astTypeSpec.Type.(*ast.Ident); ok {
-		typeDefTranslations[astTypeSpec.Name.String()] = astTypeDef.Name
+		typeDefTranslations[m.Id] = astTypeDef.Name
+		// typeDefTranslations[astTypeSpec.Name.String()] = astTypeDef.Name
 	} else if astStructType, ok := astTypeSpec.Type.(*ast.StructType); ok {
 		m.ParseFieldList(astStructType.Fields.List, modelPackage)
 		usedTypes := make(map[string]bool)
@@ -888,6 +889,12 @@ func (m *Model) ParseModel(modelName string, currentPackage string, knownModelNa
 					property.Format = basicTypesSwaggerFormats[typeName]
 					if property.Type != "array" {
 						property.Type = basicTypesSwaggerTypes[typeName]
+					} else {
+						if IsBasicType(property.Items.Type) {
+							if IsBasicTypeSwaggerType(property.Items.Type) {
+								property.Items.Type = basicTypesSwaggerTypes[property.Items.Type]
+							}
+						}
 					}
 				}
 				continue
@@ -898,6 +905,15 @@ func (m *Model) ParseModel(modelName string, currentPackage string, knownModelNa
 			if _, exists := knownModelNames[typeName]; exists {
 				// fmt.Println("@", typeName)
 				if _, ok := modelNamesPackageNames[typeName]; ok {
+					if translation, ok := typeDefTranslations[modelNamesPackageNames[typeName]]; ok {
+						if IsBasicType(translation) {
+							if IsBasicTypeSwaggerType(translation) {
+								// fmt.Println(modelNamesPackageNames[typeName], translation)
+								property.Type = basicTypesSwaggerTypes[translation]
+							}
+							continue
+						}
+					}
 					property.Ref = "#/definitions/" + modelNamesPackageNames[typeName]
 					// property.Type = ""
 				}
@@ -923,6 +939,14 @@ func (m *Model) ParseModel(modelName string, currentPackage string, knownModelNa
 						}
 					} else {
 						if property.Type == typeName {
+							if translation, ok := typeDefTranslations[modelNamesPackageNames[typeName]]; ok {
+								if IsBasicType(translation) {
+									if IsBasicTypeSwaggerType(translation) {
+										property.Type = basicTypesSwaggerTypes[translation]
+									}
+									continue
+								}
+							}
 							property.Ref = "#/definitions/" + typeModel.Id
 							// property.Type = typeModel.Id
 						} else {
@@ -1063,7 +1087,7 @@ func (p *ModelProperty) SetItemType(itemType string) {
 	p.Items = ModelPropertyItems{}
 	if IsBasicType(itemType) {
 		if IsBasicTypeSwaggerType(itemType) {
-			p.Items.Type = basicTypesSwaggerTypes[itemType]
+			p.Items.Type = itemType
 		} else {
 			p.Items.Type = "undefined"
 			// p = &ModelProperty{}
