@@ -19,6 +19,7 @@ import (
 type Parser struct {
 	// Listing                           *ResourceListing
 	// TopLevelApis                      map[string]*ApiDeclaration
+	ApiPackage                        string
 	Swagger                           *SwaggerObject
 	PackagesCache                     map[string]map[string]*ast.Package
 	CurrentPackage                    string
@@ -233,7 +234,7 @@ func (parser *Parser) CheckRealPackagePath(packagePath string) string {
 	pkgRealpath := ""
 	gopathsList := filepath.SplitList(gopath)
 	for _, path := range gopathsList {
-		if evalutedPath, err := filepath.EvalSymlinks(filepath.Join("vendor", packagePath)); err == nil {
+		if evalutedPath, err := filepath.EvalSymlinks(filepath.Join(path, "src", parser.ApiPackage, "vendor", packagePath)); err == nil {
 			if _, err := os.Stat(evalutedPath); err == nil {
 				pkgRealpath = evalutedPath
 				break
@@ -866,7 +867,8 @@ func (m *Model) ParseModel(modelName string, currentPackage string, knownModelNa
 
 	var innerModelList []*Model
 	if astTypeDef, ok := astTypeSpec.Type.(*ast.Ident); ok {
-		typeDefTranslations[astTypeSpec.Name.String()] = astTypeDef.Name
+		typeDefTranslations[m.Id] = astTypeDef.Name
+		// typeDefTranslations[astTypeSpec.Name.String()] = astTypeDef.Name
 	} else if astStructType, ok := astTypeSpec.Type.(*ast.StructType); ok {
 		m.ParseFieldList(astStructType.Fields.List, modelPackage)
 		usedTypes := make(map[string]bool)
@@ -888,6 +890,12 @@ func (m *Model) ParseModel(modelName string, currentPackage string, knownModelNa
 					property.Format = basicTypesSwaggerFormats[typeName]
 					if property.Type != "array" {
 						property.Type = basicTypesSwaggerTypes[typeName]
+					} else {
+						if IsBasicType(property.Items.Type) {
+							if IsBasicTypeSwaggerType(property.Items.Type) {
+								property.Items.Type = basicTypesSwaggerTypes[property.Items.Type]
+							}
+						}
 					}
 				}
 				continue
@@ -898,8 +906,21 @@ func (m *Model) ParseModel(modelName string, currentPackage string, knownModelNa
 			if _, exists := knownModelNames[typeName]; exists {
 				// fmt.Println("@", typeName)
 				if _, ok := modelNamesPackageNames[typeName]; ok {
-					property.Ref = "#/definitions/" + modelNamesPackageNames[typeName]
-					// property.Type = ""
+					if translation, ok := typeDefTranslations[modelNamesPackageNames[typeName]]; ok {
+						if IsBasicType(translation) {
+							if IsBasicTypeSwaggerType(translation) {
+								// fmt.Println(modelNamesPackageNames[typeName], translation)
+								property.Type = basicTypesSwaggerTypes[translation]
+							}
+							continue
+						}
+					}
+					if property.Type != "array" {
+						property.Ref = "#/definitions/" + modelNamesPackageNames[typeName]
+					} else {
+						property.Items.Ref = "#/definitions/" + modelNamesPackageNames[typeName]
+					}
+
 				}
 				continue
 			}
@@ -923,6 +944,14 @@ func (m *Model) ParseModel(modelName string, currentPackage string, knownModelNa
 						}
 					} else {
 						if property.Type == typeName {
+							if translation, ok := typeDefTranslations[modelNamesPackageNames[typeName]]; ok {
+								if IsBasicType(translation) {
+									if IsBasicTypeSwaggerType(translation) {
+										property.Type = basicTypesSwaggerTypes[translation]
+									}
+									continue
+								}
+							}
 							property.Ref = "#/definitions/" + typeModel.Id
 							// property.Type = typeModel.Id
 						} else {
@@ -970,6 +999,9 @@ func (m *Model) ParseModelProperty(field *ast.Field, modelPackage string) {
 	typeAsString := property.GetTypeAsString(field.Type)
 	//log.Printf("Get type as string %s \n", typeAsString)
 
+	reInternalIndirect := regexp.MustCompile("&\\{(\\w*) <nil> (\\w*)\\}")
+	typeAsString = string(reInternalIndirect.ReplaceAll([]byte(typeAsString), []byte("[]$2")))
+
 	// Sometimes reflection reports an object as "&{foo Bar}" rather than just "foo.Bar"
 	// The next 2 lines of code normalize them to foo.Bar
 	reInternalRepresentation := regexp.MustCompile("&\\{(\\w*) (\\w*)\\}")
@@ -978,6 +1010,14 @@ func (m *Model) ParseModelProperty(field *ast.Field, modelPackage string) {
 	if strings.HasPrefix(typeAsString, "[]") {
 		property.Type = "array"
 		property.SetItemType(typeAsString[2:])
+		// if is Unsupported item type of list, ignore this property
+		if property.Items.Type == "undefined" {
+			property = nil
+			return
+		}
+	} else if strings.HasPrefix(typeAsString, "*[]") {
+		property.Type = "array"
+		property.SetItemType(typeAsString[3:])
 		// if is Unsupported item type of list, ignore this property
 		if property.Items.Type == "undefined" {
 			property = nil
@@ -1063,7 +1103,7 @@ func (p *ModelProperty) SetItemType(itemType string) {
 	p.Items = ModelPropertyItems{}
 	if IsBasicType(itemType) {
 		if IsBasicTypeSwaggerType(itemType) {
-			p.Items.Type = basicTypesSwaggerTypes[itemType]
+			p.Items.Type = itemType
 		} else {
 			p.Items.Type = "undefined"
 			// p = &ModelProperty{}

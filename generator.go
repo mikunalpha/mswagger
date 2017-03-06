@@ -8,7 +8,6 @@ import (
 	"log"
 	"os"
 	"path"
-	"path/filepath"
 	"regexp"
 	"runtime"
 	"strings"
@@ -60,15 +59,7 @@ func Run(params Params) error {
 
 	var err error
 
-	dirname, err := filepath.Abs(filepath.Dir(os.Args[0]))
-	if err != nil {
-		return err
-	}
-	apiPackage := dirname[len(gopath)+5:]
-
 	defaultParams := Params{
-		ApiPackage:      apiPackage,
-		MainApiFile:     apiPackage + "/main.go",
 		OutputFormat:    "swagger",             // Current only swagger
 		OutputPath:      "swagger-ui/index.js", // folder path
 		ControllerClass: "",
@@ -76,10 +67,11 @@ func Run(params Params) error {
 	}
 
 	if params.ApiPackage == "" {
-		params.ApiPackage = defaultParams.ApiPackage
+		return errors.New("ApiPackage was required.")
+
 	}
 	if params.MainApiFile == "" {
-		params.MainApiFile = defaultParams.MainApiFile
+		return errors.New("MainApiFile was required.")
 	}
 	// if params.OutputFormat == "" {
 	// 	params.OutputFormat = defaultParams.OutputFormat
@@ -96,6 +88,7 @@ func Run(params Params) error {
 	}
 
 	parser := InitParser(params.ControllerClass, params.Ignore)
+	parser.ApiPackage = params.ApiPackage
 	// Support gopaths with multiple directories
 	dirs := strings.Split(gopath, ":")
 	if runtime.GOOS == "windows" {

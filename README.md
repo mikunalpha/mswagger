@@ -71,6 +71,8 @@ import "github.com/mikunalpha/mswagger"
 
 // ...
   params := mswagger.Params{
+    ApiPackage:  "your/pacakge/name",
+    MainApiFile: "your/pacakge/name/main.go",
     OutputPath: "./swagger.json",
   }
 
