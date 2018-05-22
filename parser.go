@@ -920,7 +920,6 @@ func (m *Model) ParseModel(modelName string, currentPackage string, knownModelNa
 					} else {
 						property.Items.Ref = "#/definitions/" + modelNamesPackageNames[typeName]
 					}
-
 				}
 				continue
 			}
