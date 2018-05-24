@@ -1,3 +1,5 @@
+## Maybe you can try [github.com/mikunalpha/goas](https://github.com/mikunalpha/goas)
+
 # mswagger
 Based on [yvasiyarov/swagger](https://github.com/yvasiyarov/swagger) repository.
 
